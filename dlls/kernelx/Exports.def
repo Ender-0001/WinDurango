@@ -482,8 +482,8 @@ EXPORTS
 	VirtualAllocEx                      = VirtualAllocEx_X									@475
 	VirtualFree                         = Kernel32.VirtualFree                              @476
 	VirtualFreeEx                       = Kernel32.VirtualFreeEx                            @477
-	VirtualProtect                      = Kernel32.VirtualProtect                           @478
-	VirtualProtectEx                    = Kernel32.VirtualProtectEx                         @479
+	VirtualProtect                      = VirtualProtect_X									@478
+	VirtualProtectEx                    = VirtualProtectEx_X								@479
 	VirtualQuery                        = Kernel32.VirtualQuery                             @480
 	VirtualQueryEx                      = Kernel32.VirtualQueryEx                           @481
 	WaitForMultipleObjects              = Kernel32.WaitForMultipleObjects                   @482

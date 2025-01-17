@@ -316,33 +316,7 @@ void XMemSetAllocationHooks_X(decltype(&XMemAlloc_X) Alloc, decltype(&XMemFree_X
 
 LPVOID VirtualAlloc_X(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect)
 {
-    DWORD allocationType = 0;
-
-    if (flAllocationType & MEM_COMMIT)
-        allocationType |= MEM_COMMIT;
-
-    if (flAllocationType & MEM_RESERVE)
-        allocationType |= MEM_RESERVE;
-
-    if (flAllocationType & MEM_RESET)
-        allocationType |= MEM_RESET;
-
-    if (flAllocationType & MEM_RESET_UNDO)
-        allocationType |= MEM_RESET_UNDO;
-
-    if (flAllocationType & MEM_LARGE_PAGES)
-        allocationType |= MEM_LARGE_PAGES;
-
-    if (flAllocationType & MEM_PHYSICAL)
-        allocationType |= MEM_PHYSICAL;
-
-    if (flAllocationType & MEM_TOP_DOWN)
-        allocationType |= MEM_TOP_DOWN;
-
-    if (flAllocationType & MEM_WRITE_WATCH)
-        allocationType |= MEM_WRITE_WATCH;
-
-    LPVOID result = VirtualAlloc(lpAddress, dwSize, allocationType, flProtect);
+    LPVOID result = VirtualAlloc(lpAddress, dwSize, flAllocationType & ALLOCATION_TYPE_FLAG_MASK, flProtect & PROTECTION_TYPE_FLAG_MASK);
 
 #if MEMORY_ALLOCATION_LOG
     if (result)
@@ -356,39 +330,41 @@ LPVOID VirtualAlloc_X(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, D
 
 LPVOID VirtualAllocEx_X(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect)
 {
-    DWORD allocationType = 0;
-
-    if (flAllocationType & MEM_COMMIT)
-        allocationType |= MEM_COMMIT;
-
-    if (flAllocationType & MEM_RESERVE)
-        allocationType |= MEM_RESERVE;
-
-    if (flAllocationType & MEM_RESET)
-        allocationType |= MEM_RESET;
-
-    if (flAllocationType & MEM_RESET_UNDO)
-        allocationType |= MEM_RESET_UNDO;
-
-    if (flAllocationType & MEM_LARGE_PAGES)
-        allocationType |= MEM_LARGE_PAGES;
-
-    if (flAllocationType & MEM_PHYSICAL)
-        allocationType |= MEM_PHYSICAL;
-
-    if (flAllocationType & MEM_TOP_DOWN)
-        allocationType |= MEM_TOP_DOWN;
-
-    if (flAllocationType & MEM_WRITE_WATCH)
-        allocationType |= MEM_WRITE_WATCH;
-
-    LPVOID result = VirtualAllocEx(hProcess, lpAddress, dwSize, allocationType, flProtect);
+    LPVOID result = VirtualAllocEx(hProcess, lpAddress, dwSize, flAllocationType & ALLOCATION_TYPE_FLAG_MASK, flProtect & PROTECTION_TYPE_FLAG_MASK);
 
 #if MEMORY_ALLOCATION_LOG
     if (result)
         printf("Allocation succeeded. Base address: %p\n", result);
     else
         printf("Allocation failed. Error code: %lu\n", GetLastError());
+#endif
+
+    return result;
+}
+
+BOOL VirtualProtect_X(LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect)
+{
+    BOOL result = VirtualProtect(lpAddress, dwSize, flNewProtect & PROTECTION_TYPE_FLAG_MASK, lpflOldProtect);
+
+#if MEMORY_ALLOCATION_LOG
+    if (result)
+        printf("Protection change succeeded. Base address: %p\n", lpAddress);
+    else
+        printf("Protection change failed. Error code: %lu\n", GetLastError());
+#endif
+
+    return result;
+}
+
+BOOL VirtualProtectEx_X(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect)
+{
+    BOOL result = VirtualProtectEx(hProcess, lpAddress, dwSize, flNewProtect & PROTECTION_TYPE_FLAG_MASK, lpflOldProtect);
+
+#if MEMORY_ALLOCATION_LOG
+    if (result)
+        printf("Protection change succeeded. Base address: %p\n", lpAddress);
+    else
+        printf("Protection change failed. Error code: %lu\n", GetLastError());
 #endif
 
     return result;
