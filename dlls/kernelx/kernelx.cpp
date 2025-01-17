@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#define MEM_TITLE 0x40000000
+
 NtAllocateVirtualMemory_t NtAllocateVirtualMemory;
 NtFreeVirtualMemory_t NtFreeVirtualMemory;
 
@@ -311,6 +313,35 @@ void XMemSetAllocationHooks_X(decltype(&XMemAlloc_X) Alloc, decltype(&XMemFree_X
     LeaveCriticalSection(&XMemSetAllocationHooksLock_X);
 
 }
+
+LPVOID VirtualAlloc_X(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect)
+{
+    flAllocationType = flAllocationType & ~MEM_TITLE;
+
+    LPVOID result = VirtualAlloc(lpAddress, dwSize, flAllocationType, flProtect);
+
+    if (result)
+        printf("Allocation succeeded. Base address: %p\n", result);
+    else
+        printf("Allocation failed. Error code: %lu\n", GetLastError());
+
+    return result;
+}
+
+LPVOID VirtualAllocEx_X(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect)
+{
+    flAllocationType = flAllocationType & ~MEM_TITLE;
+
+    LPVOID result = VirtualAllocEx(hProcess, lpAddress, dwSize, flAllocationType, flProtect);
+
+    if (result)
+        printf("Allocation succeeded. Base address: %p\n", result);
+    else
+        printf("Allocation failed. Error code: %lu\n", GetLastError());
+
+    return result;
+}
+
 // TODO
 // absolutely temporary implementation I just want to make it work
 // sub_18001BCA0 
